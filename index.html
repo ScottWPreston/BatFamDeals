@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BatFamDeals.com - Gotham's #1 Live Whatnot Shop</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Plus+Jakarta+Sans:wght@400;600;800&family=Permanent+Marker&display=swap" rel="stylesheet">
+    <!-- Tailwind Custom Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'bat-black': '#0a0a0f',
+                        'bat-dark': '#12131c',
+                        'bat-card': '#1a1c29',
+                        'bat-yellow': '#ffe600',
+                        'bat-yellow-neon': '#fff033',
+                        'bat-purple': '#8b5cf6',
+                        'bat-pink': '#ec4899',
+                        'bat-cyan': '#06b6d4'
+                    },
+                    fontFamily: {
+                        'comic': ['Bangers', 'cursive'],
+                        'marker': ['Permanent Marker', 'cursive'],
+                        'sans': ['Plus Jakarta Sans', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'neon-yellow': '0 0 20px rgba(255, 230, 0, 0.4)',
+                        'neon-purple': '0 0 20px rgba(139, 92, 246, 0.4)',
+                        'neon-pink': '0 0 20px rgba(236, 72, 153, 0.4)'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Custom Styles & Animations -->
+    <style>
+        body {
+            background-color: #0a0a0f;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+
+        .comic-border {
+            border: 3px solid #000;
+            box-shadow: 5px 5px 0px #000;
+        }
+
+        .comic-border-yellow {
+            border: 3px solid #ffe600;
+            box-shadow: 5px 5px 0px #ffe600;
+        }
+
+        .comic-border-purple {
+            border: 3px solid #8b5cf6;
+            box-shadow: 5px 5px 0px #8b5cf6;
+        }
+
+        .comic-bubble {
+            position: relative;
+            background: #ffffff;
+            color: #000;
+            border-radius: 18px;
+            padding: 12px 18px;
+            font-weight: 700;
+        }
+
+        .comic-bubble:after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 20px;
+            border-width: 12px 12px 0;
+            border-style: solid;
+            border-color: #ffffff transparent;
+            display: block;
+            width: 0;
+        }
+
+        .halftone-pattern {
+            background-image: radial-gradient(rgba(255, 230, 0, 0.15) 15%, transparent 16%),
+                              radial-gradient(rgba(139, 92, 246, 0.15) 15%, transparent 16%);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
+
+        @keyframes batFly {
+            0% { transform: translateY(0px) rotate(0deg) scale(0.8); opacity: 0.2; }
+            50% { transform: translateY(-25px) rotate(5deg) scale(1.1); opacity: 0.8; }
+            100% { transform: translateY(0px) rotate(0deg) scale(0.8); opacity: 0.2; }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #8b5cf6;
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ffe600;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased halftone-pattern min-h-screen flex flex-col justify-between">
+
+    <!-- Floating Bat FX Canvas Background -->
+    <canvas id="batCanvas" class="fixed inset-0 pointer-events-none z-0 opacity-30"></canvas>
+
+    <!-- Top Announcement Bar -->
+    <div class="bg-gradient-to-r from-bat-purple via-bat-pink to-bat-yellow text-black font-extrabold text-xs md:text-sm py-2 px-4 text-center tracking-wider z-50 relative flex justify-between items-center">
+        <div class="hidden sm:flex items-center gap-2">
+            <i class="fa-solid fa-bolt text-lg animate-bounce"></i>
+            <span>NEXT LIVE WHATNOT STREAM IN:</span>
+            <span class="bg-black text-bat-yellow px-2 py-0.5 rounded font-mono text-xs tracking-normal">
+                <span id="cdHours">04</span>h <span id="cdMins">42</span>m <span id="cdSecs">18</span>s
+            </span>
+        </div>
+        <div class="mx-auto sm:mx-0 font-comic text-base tracking-widest flex items-center gap-2">
+            <i class="fa-solid fa-mask"></i>
+            USE CODE <span class="bg-black text-bat-yellow px-2 py-0.5 rounded font-mono">BATSIGNAL20</span> FOR $20 OFF FIRST BID!
+        </div>
+        <div class="hidden md:flex items-center gap-2">
+            <button onclick="openImageUploadModal()" class="bg-black text-bat-yellow hover:bg-bat-dark px-2.5 py-1 rounded text-xs font-bold flex items-center gap-1 transition border border-bat-yellow">
+                <i class="fa-solid fa-camera"></i>
+                <span>UPLOAD BAT-PHOTOS</span>
+            </button>
+            <button id="soundToggleBtn" onclick="toggleAudio()" class="flex items-center gap-1 bg-black/20 hover:bg-black/40 text-black px-2 py-1 rounded text-xs transition">
+                <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+                <span id="soundText">SFX ON</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-40 bg-bat-dark/95 backdrop-blur-md border-b-2 border-bat-purple shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-12 h-12 bg-bat-yellow rounded-full border-2 border-black flex items-center justify-center transform group-hover:rotate-12 transition duration-300 shadow-neon-yellow">
+                    <i class="fa-solid fa-shield-cat text-2xl text-black"></i>
+                </div>
+                <div>
+                    <span class="font-comic text-3xl sm:text-4xl text-bat-yellow tracking-wider drop-shadow-[0_2px_0_#000]">BatFam<span class="text-bat-pink">Deals</span><span class="text-xs text-bat-cyan ml-1 font-sans font-bold uppercase">.com</span></span>
+                    <p class="text-[10px] text-gray-400 -mt-1 font-mono tracking-tight">Official Whatnot Outlet of the Dark Knight & Batgirl</p>
+                </div>
+            </a>
+
+            <!-- Nav Links -->
+            <nav class="hidden lg:flex items-center space-x-6 font-bold text-sm">
+                <a href="#featured" class="hover:text-bat-yellow transition flex items-center gap-1"><i class="fa-solid fa-boxes-packing text-bat-purple"></i> Vault Items</a>
+                <a href="#hosts" class="hover:text-bat-yellow transition flex items-center gap-1"><i class="fa-solid fa-user-ninja text-bat-pink"></i> Meet Hosts</a>
+                <a href="#bts-gallery" class="hover:text-bat-yellow transition flex items-center gap-1"><i class="fa-solid fa-images text-bat-cyan"></i> Bat-Cave Gallery</a>
+                <a href="#stream-section" class="hover:text-bat-yellow transition flex items-center gap-1 text-bat-yellow"><i class="fa-solid fa-tv text-bat-yellow"></i> Live Whatnot Stream</a>
+                <a href="#wheel" class="hover:text-bat-yellow transition flex items-center gap-1"><i class="fa-solid fa-dharmachakra text-bat-cyan"></i> Batarang Wheel</a>
+            </nav>
+
+            <!-- Actions -->
+            <div class="flex items-center space-x-3">
+                <button onclick="openImageUploadModal()" class="lg:hidden bg-bat-yellow text-black p-2 rounded-xl text-xs font-bold border border-black">
+                    <i class="fa-solid fa-camera"></i>
+                </button>
+
+                <button onclick="openLiveStreamModal()" class="relative inline-flex items-center justify-center p-0.5 overflow-hidden text-xs font-bold text-gray-900 rounded-lg group bg-gradient-to-br from-red-500 to-yellow-400 group-hover:from-red-500 group-hover:to-yellow-400 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-yellow-300">
+                    <span class="relative px-3 py-2 transition-all ease-in duration-75 bg-bat-black rounded-md group-hover:bg-opacity-0 flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span>
+                        <span class="text-bat-yellow font-comic text-base tracking-wide">WHATNOT LIVE</span>
+                    </span>
+                </button>
+
+                <button onclick="toggleCartModal()" class="relative bg-bat-card hover:bg-bat-purple/20 p-2.5 rounded-xl border border-bat-purple/50 transition">
+                    <i class="fa-solid fa-shopping-bag text-xl text-bat-yellow"></i>
+                    <span id="cartCount" class="absolute -top-1 -right-1 bg-bat-pink text-white font-bold text-xs w-5 h-5 rounded-full flex items-center justify-center border border-black">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Banner -->
+    <section class="relative z-10 py-12 lg:py-20 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                
+                <!-- Left Banner Text -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="inline-flex items-center gap-2 bg-bat-purple/20 border border-bat-purple px-3 py-1 rounded-full text-bat-yellow font-mono text-xs uppercase tracking-widest">
+                        <i class="fa-solid fa-circle text-red-500 animate-pulse"></i> Streamed Directly From The Bat-Cave
+                    </div>
+                    
+                    <h1 class="font-comic text-5xl sm:text-7xl lg:text-8xl leading-none tracking-wide text-white drop-shadow-[0_4px_0_#8b5cf6]">
+                        WE BOUGHT TOO MUCH <span class="text-bat-yellow underline decoration-bat-pink decoration-wavy">GEAR!</span>
+                    </h1>
+
+                    <p class="text-gray-300 text-base sm:text-lg max-w-2xl leading-relaxed">
+                        Welcome to <strong class="text-bat-yellow">BatFamDeals.com</strong>! Batman's cave is overflowing with surplus grappling hooks, leftover Halloween party masks, and Batgirl's hair accessories. We're auctioning it all off live on Whatnot at criminal markdown prices!
+                    </p>
+
+                    <!-- Interactive Quote Box -->
+                    <div class="bg-bat-card/80 border-2 border-bat-yellow/40 rounded-2xl p-4 flex items-start gap-4 shadow-xl">
+                        <div class="w-12 h-12 rounded-full bg-bat-yellow flex items-center justify-center shrink-0 border-2 border-black overflow-hidden">
+                            <img id="quoteAvatar" src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=200&q=80" alt="Batman" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <p id="heroDynamicQuote" class="italic text-bat-yellow font-medium text-sm sm:text-base">
+                                "I am vengeance. I am the night... and I am overstocked on Batarangs. Buy them now before Robin converts the armory into a ping-pong room."
+                            </p>
+                            <span class="text-xs text-gray-400 font-mono block mt-1">— The Dark Knight (Grumpy Deals Master)</span>
+                        </div>
+                        <button onclick="rotateBatmanQuote()" class="text-gray-400 hover:text-bat-yellow transition p-1" title="New Batman Complaint">
+                            <i class="fa-solid fa-rotate text-sm"></i>
+                        </button>
+                    </div>
+
+                    <!-- CTA Buttons -->
+                    <div class="flex flex-wrap gap-4 pt-2">
+                        <a href="#featured" class="bg-bat-yellow hover:bg-bat-yellow-neon text-black font-comic text-2xl px-8 py-3 rounded-xl comic-border transform hover:-translate-y-1 transition flex items-center gap-2 shadow-neon-yellow">
+                            <i class="fa-solid fa-cart-shopping"></i> BROWSE VAULT SALE
+                        </a>
+                        <button onclick="openImageUploadModal()" class="bg-bat-cyan hover:bg-cyan-400 text-black font-comic text-2xl px-6 py-3 rounded-xl comic-border transform hover:-translate-y-1 transition flex items-center gap-2">
+                            <i class="fa-solid fa-camera"></i> CUSTOMIZE IMAGES
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Hosts Display Card with Customizable Avatars -->
+                <div id="hosts" class="lg:col-span-5 relative">
+                    <div class="relative bg-gradient-to-b from-bat-card to-bat-dark border-2 border-bat-purple rounded-3xl p-6 shadow-2xl overflow-hidden">
+                        
+                        <!-- Host Badge Header -->
+                        <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
+                                <span class="font-comic text-xl text-bat-yellow tracking-wider">MEET YOUR STREAM HOSTS</span>
+                            </div>
+                            <button onclick="openImageUploadModal()" class="text-xs text-bat-pink hover:underline font-mono">
+                                <i class="fa-solid fa-pen-to-square"></i> Change Photos
+                            </button>
+                        </div>
+
+                        <!-- Hosts Duo Grid -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- Batman Profile -->
+                            <div class="bg-bat-black/60 rounded-2xl p-4 border border-yellow-500/30 text-center relative group hover:border-bat-yellow transition">
+                                <div class="w-24 h-24 mx-auto rounded-full bg-gradient-to-tr from-gray-800 to-black border-2 border-bat-yellow flex items-center justify-center mb-3 shadow-lg relative overflow-hidden">
+                                    <img id="batmanAvatarImg" src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=300&q=80" alt="Batman" class="w-full h-full object-cover">
+                                    <span class="absolute bottom-1 right-1 bg-black text-bat-yellow text-[9px] px-1 py-0.2 rounded border border-bat-yellow font-mono">BATMAN</span>
+                                </div>
+                                <h3 class="font-comic text-2xl text-bat-yellow">BATMAN</h3>
+                                <p class="text-xs text-bat-pink font-bold uppercase tracking-wider mb-2">Deals Master & Enforcer</p>
+                                <p class="text-[11px] text-gray-400 leading-tight">"If you don't buy these smoke bombs, I will store them in your apartment."</p>
+                            </div>
+
+                            <!-- Batgirl Profile -->
+                            <div class="bg-bat-black/60 rounded-2xl p-4 border border-pink-500/30 text-center relative group hover:border-bat-pink transition">
+                                <div class="w-24 h-24 mx-auto rounded-full bg-gradient-to-tr from-bat-purple to-bat-pink border-2 border-bat-pink flex items-center justify-center mb-3 shadow-lg relative overflow-hidden">
+                                    <img id="batgirlAvatarImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" alt="Batgirl" class="w-full h-full object-cover">
+                                    <span class="absolute bottom-1 right-1 bg-bat-pink text-white text-[9px] px-1 py-0.2 rounded border border-black font-mono">BATGIRL</span>
+                                </div>
+                                <h3 class="font-comic text-2xl text-bat-pink">BATGIRL</h3>
+                                <p class="text-xs text-bat-yellow font-bold uppercase tracking-wider mb-2">Style & Live Host</p>
+                                <p class="text-[11px] text-gray-400 leading-tight">"Welcome stream chat! Today we have gorgeous wigs and gargoyle props for $1 starts!"</p>
+                            </div>
+                        </div>
+
+                        <!-- Stream Banner Widget -->
+                        <div class="mt-6 bg-gradient-to-r from-yellow-500/20 via-purple-500/20 to-pink-500/20 rounded-2xl p-4 border border-bat-yellow/30 text-center">
+                            <p class="font-comic text-lg text-bat-yellow">WHATNOT STREAM SPECIAL</p>
+                            <p class="text-xs text-gray-300 mt-0.5">Spin the Batarang Wheel during stream for instant $5, $10, or Free Shipping credits!</p>
+                            <button onclick="scrollToWheel()" class="mt-3 bg-bat-yellow text-black font-bold text-xs px-4 py-2 rounded-lg hover:bg-white transition uppercase tracking-wider font-mono">
+                                <i class="fa-solid fa-dharmachakra"></i> Try Batarang Wheel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- BTS Photo Gallery Section -->
+    <section id="bts-gallery" class="py-16 bg-bat-dark/80 border-t border-b border-gray-800 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-8">
+                <div>
+                    <span class="text-bat-cyan font-mono text-xs uppercase tracking-widest block"><i class="fa-solid fa-camera-retro"></i> Live Stream Backstage Pass</span>
+                    <h2 class="font-comic text-4xl sm:text-6xl text-white">
+                        BEHIND THE SCENES <span class="text-bat-yellow">AT THE BATCAVE</span>
+                    </h2>
+                </div>
+                <button onclick="openImageUploadModal()" class="mt-4 md:mt-0 bg-bat-purple hover:bg-purple-600 text-white font-comic text-xl px-5 py-2 rounded-xl comic-border-yellow flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> ADD YOUR BAT-PHOTO
+                </button>
+            </div>
+
+            <!-- Gallery Grid -->
+            <div id="btsGalleryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Javascript populates BTS photos -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Product Vault Section -->
+    <section id="featured" class="py-16 bg-bat-black relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
+                <div>
+                    <div class="flex items-center gap-2 text-bat-pink font-mono text-xs uppercase tracking-widest mb-1">
+                        <i class="fa-solid fa-box-open"></i> Genuine Bat-Cave Surplus Inventory
+                    </div>
+                    <h2 class="font-comic text-4xl sm:text-6xl text-white tracking-wide">
+                        THE BAT-VAULT <span class="text-bat-yellow">CATALOG</span>
+                    </h2>
+                </div>
+
+                <!-- Category Filters -->
+                <div class="flex flex-wrap gap-2 mt-4 md:mt-0 font-comic text-lg">
+                    <button onclick="filterCategory('all')" class="cat-btn active bg-bat-yellow text-black px-4 py-1.5 rounded-xl border border-black transition" data-cat="all">ALL ITEMS</button>
+                    <button onclick="filterCategory('equipment')" class="cat-btn bg-bat-card text-gray-300 hover:text-bat-yellow px-4 py-1.5 rounded-xl border border-gray-700 transition" data-cat="equipment">🦇 BAT EQUIPMENT</button>
+                    <button onclick="filterCategory('wigs')" class="cat-btn bg-bat-card text-gray-300 hover:text-bat-yellow px-4 py-1.5 rounded-xl border border-gray-700 transition" data-cat="wigs">👩‍🦰 WIGS & DISGUISES</button>
+                    <button onclick="filterCategory('halloween')" class="cat-btn bg-bat-card text-gray-300 hover:text-bat-yellow px-4 py-1.5 rounded-xl border border-gray-700 transition" data-cat="halloween">🎃 SPOOKTACULAR</button>
+                    <button onclick="filterCategory('oddities')" class="cat-btn bg-bat-card text-gray-300 hover:text-bat-yellow px-4 py-1.5 rounded-xl border border-gray-700 transition" data-cat="oddities">☕ VARIOUS ODDITIES</button>
+                </div>
+            </div>
+
+            <!-- Product Cards Grid -->
+            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Javascript injects products -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Whatnot Live Stream Preview & Simulator -->
+    <section id="stream-section" class="py-16 z-10 relative bg-bat-dark/60 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-10">
+                <span class="bg-red-500/20 text-red-400 font-mono text-xs px-3 py-1 rounded-full border border-red-500/40 uppercase font-bold tracking-wider inline-flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> Live Broadcast Simulator
+                </span>
+                <h2 class="font-comic text-4xl sm:text-6xl text-bat-yellow mt-2 tracking-wide">
+                    WHATNOT LIVE <span class="text-bat-pink">AUCTION STREAM</span>
+                </h2>
+                <p class="text-gray-300 text-sm sm:text-base mt-2">
+                    Experience the chaotic energy of Batman keeping order while Batgirl auctions off rogue villain souvenirs live!
+                </p>
+            </div>
+
+            <!-- Live Stream Mock Box -->
+            <div class="bg-bat-card border-2 border-bat-purple rounded-3xl overflow-hidden shadow-2xl grid grid-cols-1 lg:grid-cols-12">
+                
+                <!-- Stream Screen Box -->
+                <div id="streamCoverContainer" class="lg:col-span-8 bg-black relative min-h-[380px] sm:min-h-[460px] flex flex-col justify-between p-4 sm:p-6 bg-cover bg-center transition-all duration-500" style="background-image: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80');">
+                    <div class="absolute inset-0 bg-black/70 backdrop-blur-[2px]"></div>
+
+                    <!-- Stream Header Overlays -->
+                    <div class="flex justify-between items-start z-10">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-red-600 text-white font-bold text-xs px-2.5 py-1 rounded flex items-center gap-1.5 animate-pulse">
+                                <i class="fa-solid fa-circle text-[8px]"></i> LIVE ON WHATNOT
+                            </span>
+                            <span class="bg-black/60 backdrop-blur-md text-gray-200 text-xs px-2.5 py-1 rounded border border-gray-700">
+                                <i class="fa-solid fa-eye text-bat-cyan"></i> <span id="viewerCount">2,491</span> Watching
+                            </span>
+                        </div>
+
+                        <div class="bg-bat-card/90 backdrop-blur-md border border-bat-yellow/40 rounded-xl px-3 py-1.5 text-right">
+                            <span class="text-[10px] text-gray-400 uppercase block font-mono">CURRENT AUCTION ITEM</span>
+                            <span class="font-comic text-bat-yellow text-lg leading-tight block" id="streamItemName">Tactical Titanium Batarang 3-Pack</span>
+                        </div>
+                    </div>
+
+                    <!-- Animated Video Host Content -->
+                    <div class="my-auto text-center relative z-10 py-8">
+                        <div id="streamStage" class="relative inline-block">
+                            <div class="w-40 h-40 sm:w-52 sm:h-52 mx-auto bg-gradient-to-b from-bat-purple/40 to-bat-card border-4 border-bat-yellow rounded-full flex items-center justify-center shadow-neon-yellow relative overflow-hidden">
+                                <img id="streamHostAvatar" src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=400&q=80" alt="Host On Camera" class="w-full h-full object-cover">
+                                <div class="absolute bottom-2 bg-black/80 px-3 py-0.5 rounded text-xs font-comic text-bat-pink" id="streamHostTag">BATMAN ON CAMERA</div>
+                            </div>
+
+                            <!-- Comic Speech Overlay -->
+                            <div class="comic-bubble absolute -top-8 -right-8 sm:-right-16 max-w-[200px] text-xs font-bold shadow-2xl transform rotate-3 animate-bounce">
+                                <p id="streamSpeechBubble">"Starting bid is $1! Do NOT make me hold this any longer!"</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stream Bottom Bidding Controls -->
+                    <div class="z-10 bg-bat-dark/90 backdrop-blur-md border border-bat-purple/50 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center gap-4 w-full sm:w-auto justify-between">
+                            <div>
+                                <span class="text-xs text-gray-400 font-mono block">CURRENT HIGH BID</span>
+                                <span class="font-comic text-3xl text-bat-yellow" id="currentBidDisplay">$45.00</span>
+                            </div>
+                            <div class="text-right sm:text-left">
+                                <span class="text-xs text-gray-400 font-mono block">HIGHEST BIDDER</span>
+                                <span class="font-bold text-bat-pink text-sm" id="highestBidder">@Nightwing_Official</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <button onclick="placeStreamBid(5)" class="flex-1 sm:flex-none bg-bat-purple hover:bg-purple-600 text-white font-comic text-xl px-5 py-2.5 rounded-xl comic-border-yellow transition transform hover:scale-105">
+                                +$5 BID
+                            </button>
+                            <button onclick="placeStreamBid(10)" class="flex-1 sm:flex-none bg-bat-yellow hover:bg-yellow-400 text-black font-comic text-xl px-6 py-2.5 rounded-xl comic-border transition transform hover:scale-105 shadow-neon-yellow">
+                                +$10 BID NOW
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Live Stream Chat Sidebar -->
+                <div class="lg:col-span-4 bg-bat-dark border-t lg:border-t-0 lg:border-l border-bat-purple/40 flex flex-col h-[400px] lg:h-auto">
+                    <div class="p-4 border-b border-gray-800 bg-bat-card/50 flex justify-between items-center">
+                        <span class="font-comic text-lg text-bat-yellow flex items-center gap-2">
+                            <i class="fa-solid fa-comments text-bat-pink"></i> GOTHAM LIVE CHAT
+                        </span>
+                        <span class="text-[10px] text-green-400 font-mono bg-green-950/60 px-2 py-0.5 rounded border border-green-800">CONNECTED</span>
+                    </div>
+
+                    <div id="chatBox" class="flex-1 p-4 overflow-y-auto space-y-3 font-sans text-xs">
+                        <!-- Chat comments appended dynamically -->
+                    </div>
+
+                    <div class="p-3 border-t border-gray-800 bg-bat-card/80 flex gap-2">
+                        <input id="userChatMessage" type="text" placeholder="Say something in stream chat..." class="flex-1 bg-bat-black border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-bat-yellow font-sans">
+                        <button onclick="sendUserChatMessage()" class="bg-bat-pink hover:bg-pink-600 text-white font-bold px-3 py-2 rounded-lg text-xs transition">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Mini-Game: Batarang Wheel of Discounts -->
+    <section id="wheel" class="py-16 bg-gradient-to-b from-bat-dark to-bat-black border-t border-gray-800 relative z-10">
+        <div class="max-w-5xl mx-auto px-4 text-center">
+            
+            <div class="inline-block bg-bat-yellow/10 border border-bat-yellow/30 px-4 py-1 rounded-full text-bat-yellow font-mono text-xs uppercase mb-2">
+                <i class="fa-solid fa-gamepad"></i> Interactive Bat-Cave Minigame
+            </div>
+
+            <h2 class="font-comic text-4xl sm:text-6xl text-white tracking-wide">
+                BATARANG <span class="text-bat-yellow">WHEEL OF DISCOUNTS</span>
+            </h2>
+            <p class="text-gray-400 text-sm max-w-xl mx-auto mt-1 mb-8">
+                Toss Batman's custom discount Batarang at the spinning target wheel to unlock promo codes for our next live Whatnot stream!
+            </p>
+
+            <div class="relative max-w-md mx-auto bg-bat-card/80 p-6 sm:p-8 rounded-3xl border-2 border-bat-purple shadow-2xl halftone-pattern">
+                
+                <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20 text-bat-yellow text-4xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                    <i class="fa-solid fa-caret-down"></i>
+                </div>
+
+                <div class="relative w-64 h-64 sm:w-72 sm:h-72 mx-auto my-4">
+                    <canvas id="wheelCanvas" width="300" height="300" class="w-full h-full rounded-full border-4 border-bat-yellow shadow-neon-yellow transition-transform duration-[4000ms] cubic-bezier(0.15, 0.9, 0.2, 1.0)"></canvas>
+                    
+                    <div class="absolute inset-0 m-auto w-16 h-16 bg-bat-black border-2 border-bat-yellow rounded-full flex items-center justify-center shadow-lg pointer-events-none">
+                        <i class="fa-solid fa-shield-cat text-2xl text-bat-yellow"></i>
+                    </div>
+                </div>
+
+                <button id="spinBtn" onclick="spinWheel()" class="mt-6 w-full bg-bat-yellow hover:bg-bat-yellow-neon text-black font-comic text-2xl py-3 rounded-xl comic-border transform active:scale-95 transition shadow-neon-yellow">
+                    <i class="fa-solid fa-dharmachakra"></i> TOSS BATARANG & SPIN!
+                </button>
+
+                <div id="wheelResult" class="hidden mt-4 p-4 bg-bat-purple/20 border border-bat-purple rounded-xl text-center">
+                    <p class="text-xs text-gray-300 font-mono">CONGRATULATIONS GOTHAMITE!</p>
+                    <p id="wheelPrizeText" class="font-comic text-2xl text-bat-yellow my-1">15% OFF YOUR STREAM ORDER</p>
+                    <p class="text-xs text-bat-pink font-bold font-mono">PROMO CODE: <span id="wheelCode" class="bg-black px-2 py-0.5 rounded text-white border border-bat-pink">BATWHEEL15</span></p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer class="bg-bat-black border-t border-bat-purple/40 py-10 z-10 relative text-gray-400 text-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-bat-yellow rounded-full flex items-center justify-center text-black font-bold border border-black">
+                        🦇
+                    </div>
+                    <div>
+                        <span class="font-comic text-2xl text-bat-yellow">BatFamDeals.com</span>
+                        <p class="text-xs text-gray-500">Not affiliated with Wayne Enterprises (wink wink).</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-6 text-xs font-mono">
+                    <button onclick="openImageUploadModal()" class="text-bat-cyan hover:underline">UPLOAD PHOTOS</button>
+                    <a href="#" onclick="alert('Batman does not collect taxes. Whatnot handles that!')" class="hover:text-bat-yellow transition">TAX POLICY</a>
+                    <a href="#" onclick="alert('Returns inspected by Batman. Do not return broken Batarangs!')" class="hover:text-bat-yellow transition">BAT-RETURNS</a>
+                    <a href="https://whatnot.com" target="_blank" class="text-bat-pink hover:underline">OFFICIAL WHATNOT SHOP</a>
+                </div>
+
+                <div class="text-xs text-gray-500 font-mono text-center md:text-right">
+                    © 2026 BatFamDeals. Live Auction Stream powered by Whatnot.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Custom Image Upload & Customizer Modal -->
+    <div id="imageUploadModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-bat-card border-2 border-bat-yellow rounded-3xl w-full max-w-2xl p-6 shadow-2xl relative">
+            <button onclick="closeImageUploadModal()" class="absolute top-4 right-4 bg-black text-white w-8 h-8 rounded-full flex items-center justify-center border border-bat-yellow hover:bg-bat-yellow hover:text-black transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex items-center gap-3 border-b border-gray-800 pb-4 mb-6">
+                <div class="w-10 h-10 bg-bat-yellow text-black rounded-full flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-camera"></i>
+                </div>
+                <div>
+                    <h3 class="font-comic text-3xl text-bat-yellow leading-none">BAT-PHOTO MANAGER</h3>
+                    <p class="text-xs text-gray-400 font-mono">Upload or paste custom photos for Batman, Batgirl, or the vault products!</p>
+                </div>
+            </div>
+
+            <!-- Upload Forms Grid -->
+            <div class="space-y-6">
+                
+                <!-- Batman Avatar Upload -->
+                <div class="bg-bat-dark p-4 rounded-2xl border border-gray-800 flex flex-col sm:flex-row items-center gap-4">
+                    <div class="w-20 h-20 rounded-full border-2 border-bat-yellow overflow-hidden shrink-0">
+                        <img id="previewBatmanModal" src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=200&q=80" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1 w-full space-y-2">
+                        <label class="font-comic text-xl text-bat-yellow block">Batman Avatar Photo</label>
+                        <div class="flex gap-2">
+                            <input type="file" id="fileBatman" accept="image/*" class="hidden" onchange="handleFileSelect(event, 'batman')">
+                            <button onclick="document.getElementById('fileBatman').click()" class="bg-bat-purple hover:bg-purple-600 text-white text-xs px-3 py-2 rounded-lg font-mono">
+                                <i class="fa-solid fa-upload"></i> Upload File
+                            </button>
+                            <input type="text" id="urlBatman" placeholder="Or paste Image URL..." class="flex-1 bg-bat-black border border-gray-700 text-xs text-white px-3 py-2 rounded-lg font-mono">
+                            <button onclick="updateImageFromUrl('batman')" class="bg-bat-yellow text-black text-xs font-bold px-3 py-2 rounded-lg">Apply</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Batgirl Avatar Upload -->
+                <div class="bg-bat-dark p-4 rounded-2xl border border-gray-800 flex flex-col sm:flex-row items-center gap-4">
+                    <div class="w-20 h-20 rounded-full border-2 border-bat-pink overflow-hidden shrink-0">
+                        <img id="previewBatgirlModal" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1 w-full space-y-2">
+                        <label class="font-comic text-xl text-bat-pink block">Batgirl Avatar Photo</label>
+                        <div class="flex gap-2">
+                            <input type="file" id="fileBatgirl" accept="image/*" class="hidden" onchange="handleFileSelect(event, 'batgirl')">
+                            <button onclick="document.getElementById('fileBatgirl').click()" class="bg-bat-pink hover:bg-pink-600 text-white text-xs px-3 py-2 rounded-lg font-mono">
+                                <i class="fa-solid fa-upload"></i> Upload File
+                            </button>
+                            <input type="text" id="urlBatgirl" placeholder="Or paste Image URL..." class="flex-1 bg-bat-black border border-gray-700 text-xs text-white px-3 py-2 rounded-lg font-mono">
+                            <button onclick="updateImageFromUrl('batgirl')" class="bg-bat-yellow text-black text-xs font-bold px-3 py-2 rounded-lg">Apply</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Stream Background Banner -->
+                <div class="bg-bat-dark p-4 rounded-2xl border border-gray-800 space-y-2">
+                    <label class="font-comic text-xl text-bat-yellow block"><i class="fa-solid fa-tv"></i> Stream Studio Background Image</label>
+                    <div class="flex gap-2">
+                        <input type="file" id="fileStreamCover" accept="image/*" class="hidden" onchange="handleFileSelect(event, 'streamCover')">
+                        <button onclick="document.getElementById('fileStreamCover').click()" class="bg-bat-cyan text-black text-xs px-3 py-2 rounded-lg font-mono font-bold">
+                            <i class="fa-solid fa-upload"></i> Upload Studio Cover
+                        </button>
+                        <input type="text" id="urlStreamCover" placeholder="Paste Studio Background Image URL..." class="flex-1 bg-bat-black border border-gray-700 text-xs text-white px-3 py-2 rounded-lg font-mono">
+                        <button onclick="updateImageFromUrl('streamCover')" class="bg-bat-yellow text-black text-xs font-bold px-3 py-2 rounded-lg">Apply</button>
+                    </div>
+                </div>
+
+                <!-- Add New BTS Photo to Gallery -->
+                <div class="bg-bat-dark p-4 rounded-2xl border border-gray-800 space-y-2">
+                    <label class="font-comic text-xl text-bat-cyan block"><i class="fa-solid fa-images"></i> Add Photo to Batcave Behind the Scenes Gallery</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input type="text" id="btsCaptionInput" placeholder="Photo Caption (e.g. Robin testing Batarang)..." class="bg-bat-black border border-gray-700 text-xs text-white px-3 py-2 rounded-lg font-mono">
+                        <input type="file" id="fileBts" accept="image/*" class="hidden" onchange="handleFileSelect(event, 'bts')">
+                        <button onclick="document.getElementById('fileBts').click()" class="bg-bat-purple text-white text-xs px-3 py-2 rounded-lg font-mono">
+                            <i class="fa-solid fa-camera"></i> Upload Gallery Image File
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-gray-800 text-right">
+                <button onclick="closeImageUploadModal()" class="bg-bat-yellow hover:bg-bat-yellow-neon text-black font-comic text-xl px-6 py-2 rounded-xl comic-border">
+                    DONE & SAVE PHOTOS
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Modal Drawers & Popups -->
+    <div id="cartModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex justify-end">
+        <div class="w-full max-w-md bg-bat-card border-l-2 border-bat-purple h-full p-6 flex flex-col justify-between shadow-2xl">
+            <div>
+                <div class="flex items-center justify-between border-b border-gray-800 pb-4 mb-4">
+                    <h3 class="font-comic text-3xl text-bat-yellow flex items-center gap-2">
+                        <i class="fa-solid fa-shopping-bag text-bat-pink"></i> YOUR BAT-VAULT CART
+                    </h3>
+                    <button onclick="toggleCartModal()" class="text-gray-400 hover:text-white text-2xl">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div id="cartItemsList" class="space-y-3 overflow-y-auto max-h-[60vh] pr-1">
+                    <!-- Cart Items injected via JS -->
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 pt-4 space-y-4">
+                <div class="flex justify-between items-center text-base font-bold">
+                    <span class="text-gray-300">ESTIMATED TOTAL:</span>
+                    <span class="font-comic text-3xl text-bat-yellow" id="cartTotalPrice">$0.00</span>
+                </div>
+                
+                <p class="text-[11px] text-gray-400 font-mono text-center">
+                    <i class="fa-solid fa-shield text-bat-cyan"></i> Checkout redirects to official Whatnot live inventory stream!
+                </p>
+
+                <button onclick="checkoutCart()" class="w-full bg-bat-yellow hover:bg-bat-yellow-neon text-black font-comic text-2xl py-3 rounded-xl comic-border transition shadow-neon-yellow">
+                    PROCEED TO WHATNOT CHECKOUT
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Stream Interactive Modal Preview -->
+    <div id="streamModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-bat-card border-2 border-bat-yellow rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl relative">
+            <button onclick="closeLiveStreamModal()" class="absolute top-4 right-4 z-30 bg-black/80 text-white w-8 h-8 rounded-full flex items-center justify-center border border-bat-yellow hover:bg-bat-yellow hover:text-black transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="p-6 text-center">
+                <span class="bg-red-600 text-white font-bold text-xs px-3 py-1 rounded-full animate-pulse uppercase">NOW STREAMING LIVE</span>
+                <h3 class="font-comic text-4xl text-bat-yellow mt-2">BATMAN & BATGIRL WHATNOT SHOW</h3>
+                <p class="text-sm text-gray-300 mt-1 max-w-md mx-auto">You are tuned in to the Bat-Cave studio! Get ready to place live bids and chat with Gotham characters!</p>
+                <div class="my-6 bg-black p-8 rounded-2xl border border-bat-purple halftone-pattern">
+                    <i class="fa-solid fa-headset text-6xl text-bat-pink animate-bounce"></i>
+                    <p class="font-comic text-2xl text-white mt-4">STREAM AUDIO & CHAT IS LIVE</p>
+                    <p class="text-xs font-mono text-bat-yellow mt-1">Use the main live simulator screen on the webpage to place $1 starts!</p>
+                </div>
+                <button onclick="closeLiveStreamModal()" class="bg-bat-pink hover:bg-pink-600 text-white font-comic text-2xl px-8 py-2.5 rounded-xl comic-border">
+                    JOIN LIVE AUCTION CHAT NOW
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast Popup -->
+    <div id="toastNotification" class="fixed bottom-6 left-6 z-50 bg-bat-card border-2 border-bat-yellow px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 transform translate-y-32 transition duration-500 max-w-sm">
+        <div class="w-10 h-10 rounded-full bg-bat-yellow flex items-center justify-center text-black font-bold shrink-0">
+            🦇
+        </div>
+        <div>
+            <p id="toastTitle" class="font-comic text-lg text-bat-yellow leading-none">NEW WHATNOT BID!</p>
+            <p id="toastBody" class="text-xs text-gray-300 font-mono mt-1">@Robin_Official just bid $35 on Disguise Wig!</p>
+        </div>
+    </div>
+
+    <script>
+        // Global State & Default Images
+        let customImages = {
+            batman: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=400&q=80",
+            batgirl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+            streamCover: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80"
+        };
+
+        let btsGallery = [
+            {
+                id: 1,
+                title: "Batman Packing Batarang Orders",
+                image: "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=600&q=80",
+                caption: "Late night packing at the Batcave shipping desk."
+            },
+            {
+                id: 2,
+                title: "Batgirl Trying Red Disguise Wigs",
+                image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80",
+                caption: "Quality testing synthetic fiber wigs for the live show."
+            },
+            {
+                id: 3,
+                title: "Testing Grappling Hook Cable",
+                image: "https://images.unsplash.com/photo-1519074069444-1ba4eae287b6?auto=format&fit=crop&w=600&q=80",
+                caption: "Every surplus gear item is safety checked before auction."
+            },
+            {
+                id: 4,
+                title: "Alfred's Teacup Vault Inventory",
+                image: "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?auto=format&fit=crop&w=600&q=80",
+                caption: "Polishing Wayne Manor porcelain prior to Tuesday's stream."
+            }
+        ];
+
+        const products = [
+            {
+                id: 1,
+                name: "Tactical Titanium Batarang 3-Pack",
+                category: "equipment",
+                price: 49.99,
+                originalPrice: 89.99,
+                rating: 4.9,
+                image: "https://images.unsplash.com/photo-1589241062272-c0a000072dfa?auto=format&fit=crop&w=400&q=80",
+                badge: "MOST POPULAR",
+                description: "Authentic Gotham night-surplus! Balanced for stealth tossing or opening mail."
+            },
+            {
+                id: 2,
+                name: "Batgirl's Fiery Red Signature Wig",
+                category: "wigs",
+                price: 34.50,
+                originalPrice: 60.00,
+                rating: 5.0,
+                image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=400&q=80",
+                badge: "BATGIRL FAV",
+                description: "High-grade synthetic hair. Stays perfect even while grappling between skyscrapers!"
+            },
+            {
+                id: 3,
+                name: "Illuminated LED Rooftop Gargoyle",
+                category: "halloween",
+                price: 110.00,
+                originalPrice: 180.00,
+                rating: 4.8,
+                image: "https://images.unsplash.com/photo-1508873696983-2df515122519?auto=format&fit=crop&w=400&q=80",
+                badge: "HALLOWEEN SPECIAL",
+                description: "Perfect spooky front-porch decor! Casts an ominous silhouette over your lawn."
+            },
+            {
+                id: 4,
+                name: "Alfred's Porcelain Tea & Biscuit Set",
+                category: "oddities",
+                price: 29.99,
+                originalPrice: 45.00,
+                rating: 5.0,
+                image: "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?auto=format&fit=crop&w=400&q=80",
+                badge: "ALFRED APPROVED",
+                description: "Hand-crafted fine china used in Wayne Manor. Keeps tea piping hot during long night shifts."
+            },
+            {
+                id: 5,
+                name: "Bat-Disguise Mustache & Toupee Kit",
+                category: "wigs",
+                price: 19.99,
+                originalPrice: 35.00,
+                rating: 4.2,
+                image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+                badge: "DISGUISE",
+                description: "Batman's emergency incognito kit when grabbing coffee in public."
+            },
+            {
+                id: 6,
+                name: "Heavy-Duty Grappling Hook Gun",
+                category: "equipment",
+                price: 125.00,
+                originalPrice: 210.00,
+                rating: 4.9,
+                image: "https://images.unsplash.com/photo-1519074069444-1ba4eae287b6?auto=format&fit=crop&w=400&q=80",
+                badge: "SURPLUS",
+                description: "Fires high-tensile steel cable. Holds up to 350 lbs."
+            },
+            {
+                id: 7,
+                name: "Gotham Villain Arkham Mask Set",
+                category: "halloween",
+                price: 45.00,
+                originalPrice: 75.00,
+                rating: 4.7,
+                image: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=400&q=80",
+                badge: "SPOOKY",
+                description: "Includes Joker, Scarecrow, and Riddler masks for Halloween."
+            },
+            {
+                id: 8,
+                name: "Robin's Lost Yellow Satin Cape",
+                category: "oddities",
+                price: 15.00,
+                originalPrice: 40.00,
+                rating: 4.4,
+                image: "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=400&q=80",
+                badge: "LOST & FOUND",
+                description: "Left in the Batmobile backseat. Batman wants it gone immediately!"
+            }
+        ];
+
+        const batmanQuotes = [
+            "\"I am vengeance. I am the night... and I am overstocked on Batarangs. Buy them now before Robin converts the armory into a ping-pong room.\"",
+            "\"Batgirl told me Whatnot live streams would build community. I just want my cave floor back.\"",
+            "\"If the Joker bids on my smoke bombs again, I am personally delivering them to his hideout.\"",
+            "\"Buy the wigs. Please. Batgirl has 400 mannequin heads in the Batcave lobby.\"",
+            "\"Do not ask for free shipping. Fuel for the Batmobile is not cheap.\""
+        ];
+
+        const chatMessages = [
+            { user: "Nightwing_Official", text: "Is Batman selling my old workout weights again?!", color: "text-blue-400" },
+            { user: "Joker_Grin", text: "HA HA! Can I pay in fake dynamite coins?! 💣", color: "text-green-400" },
+            { user: "Alfred_Butler", text: "Master Bruce, please remember to offer free tea biscuits with $50 orders.", color: "text-yellow-300" },
+            { user: "Harley_Q", text: "Ooooh! Is that red wig available?! Puddin' needs a new style!", color: "text-pink-400" },
+            { user: "Catwoman_Selina", text: "Bid $50 on the teacups! Don't outbid me, Bruce darling. 😉", color: "text-purple-400" },
+            { user: "Riddler_77", text: "Riddle me this: What costs $1 and flies through the sky? THIS BID!", color: "text-green-500" }
+        ];
+
+        let cart = [];
+        let currentBid = 45.00;
+        let quoteIndex = 0;
+        let sfxEnabled = true;
+
+        // Web Audio SFX Generator
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playBatarangSound() {
+            if (!sfxEnabled) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
+            } catch (e) { console.log(e); }
+        }
+
+        function toggleAudio() {
+            sfxEnabled = !sfxEnabled;
+            const text = document.getElementById('soundText');
+            const icon = document.getElementById('soundIcon');
+            if (sfxEnabled) {
+                text.innerText = "SFX ON";
+                icon.className = "fa-solid fa-volume-high";
+            } else {
+                text.innerText = "SFX OFF";
+                icon.className = "fa-solid fa-volume-xmark";
+            }
+        }
+
+        // Image Customizer & File Handling Logic
+        function openImageUploadModal() {
+            document.getElementById('imageUploadModal').classList.remove('hidden');
+        }
+
+        function closeImageUploadModal() {
+            document.getElementById('imageUploadModal').classList.add('hidden');
+        }
+
+        function handleFileSelect(event, target) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imageUrl = e.target.result;
+                applyCustomImage(target, imageUrl);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updateImageFromUrl(target) {
+            let inputId = target === 'batman' ? 'urlBatman' : target === 'batgirl' ? 'urlBatgirl' : 'urlStreamCover';
+            const url = document.getElementById(inputId).value.trim();
+            if (url) {
+                applyCustomImage(target, url);
+                document.getElementById(inputId).value = '';
+            }
+        }
+
+        function applyCustomImage(target, url) {
+            if (target === 'batman') {
+                customImages.batman = url;
+                document.getElementById('batmanAvatarImg').src = url;
+                document.getElementById('quoteAvatar').src = url;
+                document.getElementById('previewBatmanModal').src = url;
+                document.getElementById('streamHostAvatar').src = url;
+                showToast("PHOTO UPDATED!", "Batman avatar updated successfully!");
+            } else if (target === 'batgirl') {
+                customImages.batgirl = url;
+                document.getElementById('batgirlAvatarImg').src = url;
+                document.getElementById('previewBatgirlModal').src = url;
+                showToast("PHOTO UPDATED!", "Batgirl avatar updated successfully!");
+            } else if (target === 'streamCover') {
+                customImages.streamCover = url;
+                document.getElementById('streamCoverContainer').style.backgroundImage = `url('${url}')`;
+                showToast("COVER UPDATED!", "Stream background picture updated!");
+            } else if (target === 'bts') {
+                const caption = document.getElementById('btsCaptionInput').value.trim() || "New Batcave Moment";
+                btsGallery.unshift({
+                    id: Date.now(),
+                    title: "Custom Bat-Photo",
+                    image: url,
+                    caption: caption
+                });
+                renderGallery();
+                document.getElementById('btsCaptionInput').value = '';
+                showToast("GALLERY UPDATED!", "New behind the scenes photo added!");
+            }
+            playBatarangSound();
+        }
+
+        // Render BTS Gallery
+        function renderGallery() {
+            const grid = document.getElementById('btsGalleryGrid');
+            grid.innerHTML = '';
+
+            btsGallery.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-bat-card rounded-2xl border border-bat-purple/40 overflow-hidden hover:border-bat-yellow transition duration-300 shadow-xl group";
+                card.innerHTML = `
+                    <div class="h-48 relative overflow-hidden bg-black">
+                        <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        <span class="absolute top-2 left-2 bg-black/80 text-bat-yellow text-[10px] font-mono px-2 py-0.5 rounded border border-bat-yellow">BATCAVE BTS</span>
+                    </div>
+                    <div class="p-4">
+                        <h4 class="font-comic text-xl text-white group-hover:text-bat-yellow transition">${item.title}</h4>
+                        <p class="text-xs text-gray-400 mt-1 leading-relaxed font-sans">${item.caption}</p>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Render Product Vault
+        function renderProducts(categoryFilter = 'all') {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = '';
+
+            const filtered = categoryFilter === 'all' 
+                ? products 
+                : products.filter(p => p.category === categoryFilter);
+
+            filtered.forEach(p => {
+                const card = document.createElement('div');
+                card.className = "bg-bat-card rounded-2xl border border-bat-purple/40 p-5 flex flex-col justify-between hover:border-bat-yellow transition duration-300 shadow-xl group";
+                card.innerHTML = `
+                    <div>
+                        <div class="relative h-44 bg-bat-dark rounded-xl overflow-hidden mb-4 border border-gray-800 group-hover:border-bat-purple/50 transition">
+                            <span class="absolute top-2 left-2 z-10 bg-bat-pink text-white font-mono font-bold text-[10px] px-2 py-0.5 rounded">${p.badge}</span>
+                            <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        </div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs text-gray-400 font-mono uppercase tracking-wider">${p.category}</span>
+                            <span class="text-xs text-bat-yellow flex items-center gap-1 font-bold"><i class="fa-solid fa-star"></i> ${p.rating}</span>
+                        </div>
+                        <h3 class="font-comic text-2xl text-white group-hover:text-bat-yellow transition">${p.name}</h3>
+                        <p class="text-xs text-gray-400 mt-1 leading-relaxed">${p.description}</p>
+                    </div>
+
+                    <div class="mt-5 pt-4 border-t border-gray-800 flex items-center justify-between">
+                        <div>
+                            <span class="text-xs text-gray-500 line-through block font-mono">$${p.originalPrice.toFixed(2)}</span>
+                            <span class="font-comic text-2xl text-bat-yellow">$${p.price.toFixed(2)}</span>
+                        </div>
+                        <button onclick="addToCart(${p.id})" class="bg-bat-purple hover:bg-bat-pink text-white font-comic text-lg px-4 py-1.5 rounded-xl border border-black transition active:scale-95 flex items-center gap-1">
+                            <i class="fa-solid fa-cart-plus"></i> ADD
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Category Filter
+        function filterCategory(cat) {
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                if (btn.dataset.cat === cat) {
+                    btn.className = "cat-btn active bg-bat-yellow text-black px-4 py-1.5 rounded-xl border border-black transition";
+                } else {
+                    btn.className = "cat-btn bg-bat-card text-gray-300 hover:text-bat-yellow px-4 py-1.5 rounded-xl border border-gray-700 transition";
+                }
+            });
+            renderProducts(cat);
+            playBatarangSound();
+        }
+
+        // Cart Functions
+        function addToCart(productId) {
+            const prod = products.find(p => p.id === productId);
+            const existing = cart.find(item => item.id === productId);
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ ...prod, qty: 1 });
+            }
+            updateCartUI();
+            showToast("ADDED TO BAT-CART!", `${prod.name} added to your vault cart.`);
+            playBatarangSound();
+        }
+
+        function updateCartUI() {
+            const countEl = document.getElementById('cartCount');
+            const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+            countEl.innerText = totalQty;
+
+            const listEl = document.getElementById('cartItemsList');
+            const totalEl = document.getElementById('cartTotalPrice');
+
+            if (cart.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center py-12 text-gray-500 font-mono text-xs">
+                        <i class="fa-solid fa-box-open text-4xl mb-2 text-bat-purple block"></i>
+                        YOUR BAT-CART IS EMPTY! BROWSE THE VAULT.
+                    </div>
+                `;
+                totalEl.innerText = "$0.00";
+                return;
+            }
+
+            listEl.innerHTML = '';
+            let total = 0;
+
+            cart.forEach(item => {
+                total += item.price * item.qty;
+                const div = document.createElement('div');
+                div.className = "bg-bat-dark p-3 rounded-xl border border-gray-800 flex items-center justify-between";
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <img src="${item.image}" class="w-10 h-10 rounded-lg object-cover border border-bat-yellow">
+                        <div>
+                            <h4 class="font-comic text-lg text-white leading-tight">${item.name}</h4>
+                            <span class="text-xs text-bat-yellow font-mono">$${item.price.toFixed(2)} x ${item.qty}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="changeQty(${item.id}, -1)" class="w-6 h-6 bg-gray-800 text-white rounded hover:bg-bat-purple">-</button>
+                        <span class="text-xs font-mono">${item.qty}</span>
+                        <button onclick="changeQty(${item.id}, 1)" class="w-6 h-6 bg-gray-800 text-white rounded hover:bg-bat-purple">+</button>
+                    </div>
+                `;
+                listEl.appendChild(div);
+            });
+
+            totalEl.innerText = `$${total.toFixed(2)}`;
+        }
+
+        function changeQty(id, delta) {
+            const item = cart.find(i => i.id === id);
+            if (!item) return;
+            item.qty += delta;
+            if (item.qty <= 0) {
+                cart = cart.filter(i => i.id !== id);
+            }
+            updateCartUI();
+        }
+
+        function toggleCartModal() {
+            document.getElementById('cartModal').classList.toggle('hidden');
+        }
+
+        function checkoutCart() {
+            if (cart.length === 0) {
+                alert("Your cart is empty! Add some Batarangs or wigs first.");
+                return;
+            }
+            alert("Redirecting to BatFamDeals Whatnot Live Stream Checkout! Get ready to bid live!");
+            cart = [];
+            updateCartUI();
+            toggleCartModal();
+        }
+
+        // Quotes Rotation
+        function rotateBatmanQuote() {
+            quoteIndex = (quoteIndex + 1) % batmanQuotes.length;
+            document.getElementById('heroDynamicQuote').innerText = batmanQuotes[quoteIndex];
+            playBatarangSound();
+        }
+
+        // Stream Simulator Bidding
+        function placeStreamBid(amount) {
+            currentBid += amount;
+            document.getElementById('currentBidDisplay').innerText = `$${currentBid.toFixed(2)}`;
+            document.getElementById('highestBidder').innerText = "@YOU (Stream Viewer)";
+            
+            showToast("HIGH BIDDER!", `You are now the high bidder at $${currentBid.toFixed(2)}!`);
+            playBatarangSound();
+
+            const reactions = [
+                `"Whoa! $${currentBid.toFixed(2)} from the chat! Going once!"`,
+                `"Now that's a Gotham bid! Batman, hit the gavel!"`,
+                `"Keep it coming! All proceeds go to Batmobile rocket fuel!"`
+            ];
+            document.getElementById('streamSpeechBubble').innerText = reactions[Math.floor(Math.random() * reactions.length)];
+        }
+
+        function appendChatMessage(user, text, color = "text-bat-yellow") {
+            const chatBox = document.getElementById('chatBox');
+            const msg = document.createElement('div');
+            msg.className = "bg-bat-card/60 p-2 rounded-lg border border-gray-800/80 animate-fade-in";
+            msg.innerHTML = `<strong class="${color}">${user}:</strong> <span class="text-gray-200">${text}</span>`;
+            chatBox.appendChild(msg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function sendUserChatMessage() {
+            const input = document.getElementById('userChatMessage');
+            if (!input.value.trim()) return;
+            appendChatMessage("YOU (Gothamite)", input.value.trim(), "text-bat-pink");
+            input.value = "";
+            playBatarangSound();
+        }
+
+        function openLiveStreamModal() {
+            document.getElementById('streamModal').classList.remove('hidden');
+        }
+
+        function closeLiveStreamModal() {
+            document.getElementById('streamModal').classList.add('hidden');
+        }
+
+        function scrollToWheel() {
+            document.getElementById('wheel').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showToast(title, body) {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastBody').innerText = body;
+            toast.classList.remove('translate-y-32');
+            setTimeout(() => {
+                toast.classList.add('translate-y-32');
+            }, 3500);
+        }
+
+        // Batarang Wheel Canvas
+        const segments = ["10% OFF", "FREE SHIP", "$5 CREDIT", "BAT-STICKER", "20% OFF", "ALFRED TEA"];
+        const segmentColors = ["#8b5cf6", "#ffe600", "#ec4899", "#06b6d4", "#8b5cf6", "#ffe600"];
+
+        function drawWheel() {
+            const canvas = document.getElementById('wheelCanvas');
+            if (!canvas.getContext) return;
+            const ctx = canvas.getContext('2d');
+            const numSegments = segments.length;
+            const anglePerSegment = (2 * Math.PI) / numSegments;
+
+            ctx.clearRect(0, 0, 300, 300);
+
+            for (let i = 0; i < numSegments; i++) {
+                const angle = i * anglePerSegment;
+                ctx.beginPath();
+                ctx.fillStyle = segmentColors[i];
+                ctx.moveTo(150, 150);
+                ctx.arc(150, 150, 140, angle, angle + anglePerSegment);
+                ctx.lineTo(150, 150);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.save();
+                ctx.translate(150, 150);
+                ctx.rotate(angle + anglePerSegment / 2);
+                ctx.textAlign = "right";
+                ctx.fillStyle = "#000000";
+                ctx.font = "bold 16px Bangers, cursive";
+                ctx.fillText(segments[i], 120, 5);
+                ctx.restore();
+            }
+        }
+
+        let isSpinning = false;
+        let currentRotation = 0;
+
+        function spinWheel() {
+            if (isSpinning) return;
+            isSpinning = true;
+            playBatarangSound();
+
+            const canvas = document.getElementById('wheelCanvas');
+            const randomExtraDeg = Math.floor(Math.random() * 360) + 1440;
+            currentRotation += randomExtraDeg;
+
+            canvas.style.transform = `rotate(${currentRotation}deg)`;
+
+            setTimeout(() => {
+                isSpinning = false;
+                document.getElementById('wheelResult').classList.remove('hidden');
+                showToast("WHEEL WINNER!", "You unlocked a discount code for the Whatnot live stream!");
+            }, 4000);
+        }
+
+        // Floating Bats Background
+        function initBatCanvas() {
+            const canvas = document.getElementById('batCanvas');
+            const ctx = canvas.getContext('2d');
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+
+            window.addEventListener('resize', () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            });
+
+            const bats = Array.from({ length: 22 }, () => ({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                speedX: (Math.random() - 0.5) * 1.5,
+                speedY: (Math.random() - 0.5) * 1.5,
+                size: Math.random() * 12 + 8
+            }));
+
+            function animateBats() {
+                ctx.clearRect(0, 0, width, height);
+                ctx.fillStyle = "#8b5cf6";
+
+                bats.forEach(bat => {
+                    bat.x += bat.speedX;
+                    bat.y += bat.speedY;
+
+                    if (bat.x < 0) bat.x = width;
+                    if (bat.x > width) bat.x = 0;
+                    if (bat.y < 0) bat.y = height;
+                    if (bat.y > height) bat.y = 0;
+
+                    ctx.beginPath();
+                    ctx.arc(bat.x, bat.y, bat.size / 3, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                requestAnimationFrame(animateBats);
+            }
+            animateBats();
+        }
+
+        function startCountdownTimer() {
+            let hours = 4, mins = 42, secs = 18;
+            setInterval(() => {
+                secs--;
+                if (secs < 0) {
+                    secs = 59;
+                    mins--;
+                    if (mins < 0) {
+                        mins = 59;
+                        hours--;
+                    }
+                }
+                const hEl = document.getElementById('cdHours');
+                const mEl = document.getElementById('cdMins');
+                const sEl = document.getElementById('cdSecs');
+                if (hEl) hEl.innerText = String(hours).padStart(2, '0');
+                if (mEl) mEl.innerText = String(mins).padStart(2, '0');
+                if (sEl) sEl.innerText = String(secs).padStart(2, '0');
+            }, 1000);
+        }
+
+        function startStreamChatSimulation() {
+            let index = 0;
+            setInterval(() => {
+                const item = chatMessages[index % chatMessages.length];
+                appendChatMessage(item.user, item.text, item.color);
+                index++;
+
+                const countEl = document.getElementById('viewerCount');
+                if (countEl) {
+                    let count = parseInt(countEl.innerText.replace(/,/g, '')) || 2491;
+                    count += Math.floor(Math.random() * 11) - 5;
+                    countEl.innerText = count.toLocaleString();
+                }
+            }, 3500);
+        }
+
+        // Init
+        window.onload = function() {
+            renderProducts();
+            renderGallery();
+            drawWheel();
+            initBatCanvas();
+            startCountdownTimer();
+            startStreamChatSimulation();
+
+            appendChatMessage("Batgirl_Live", "Welcome stream! Today we have surplus Batarangs and Alfred's teacups!", "text-bat-pink");
+            appendChatMessage("Batman_Cave", "No refunds on smoke bombs.", "text-bat-yellow");
+        };
+    </script>
+</body>
+</html>
